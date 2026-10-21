@@ -1,0 +1,489 @@
+#Use the Iris dataset and train a Logistic Regression model to whether a flower is of species Iris-setosa or not. Evaluate model accuracy, precision, and recall.
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score,precision_score,recall_score
+iris=load_iris()
+X=iris.data
+y=(iris.target==0).astype(int)
+model=LogisticRegression(max_iter=200)
+X_train,X_test,y_train,y_test=train_test_split(X,y,random_state=42,test_size=0.2)
+model.fit(X_train,y_train)
+y_pred=model.predict(X_test)
+print("Accuracy Score : ",accuracy_score(y_test,y_pred))
+print("Precision Score : ",precision_score(y_test,y_pred))
+print("Recall Score : ",recall_score(y_test,y_pred))
+for i in range(5):
+    if y_pred[i]==1:
+        print(f"Flower {i} : Setosa")
+    else:
+        print(f"Flower {i} : Not Setosa")
+
+
+#Load the Titanic dataset, perform basic preprocessing (handle missing values, encode
+#categorical variables), and train a Decision Tree classifier to predict the model. Plot the
+#confusion matrix.
+from sklearn.tree import DecisionTreeClassifier,export_text
+from sklearn.metrics import confusion_matrix,accuracy_score
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+df=pd.read_csv("https://raw.githubusercontent.com/aashii2004/Titanic-Dataset/refs/heads/main/Titanic-Dataset%20(1).csv")
+df=df.drop(["PassengerId","Name","Cabin","Ticket"],axis=1)
+df["Age"]=df["Age"].fillna(df["Age"].median())
+df["Embarked"]=df["Embarked"].fillna(df["Embarked"].mode()[0])
+df["Sex"]=df["Sex"].map({"male":0,"female":1})
+df["Embarked"]=df["Embarked"].map({"S":0,"C":1,"Q":2})
+X=df.drop("Survived",axis=1)
+y=df["Survived"]
+model=DecisionTreeClassifier(random_state=42)
+X_train,X_test,y_train,y_test=train_test_split(X,y,random_state=42,test_size=0.2)
+model.fit(X_train,y_train)
+print(export_text(model,feature_names=list(X.columns)))
+y_pred=model.predict(X_test)
+print("Accuracy Score : ",accuracy_score(y_test,y_pred))
+cm=confusion_matrix(y_test,y_pred)
+sns.heatmap(cm,annot=True,fmt="d",cmap="Blues")
+plt.xlabel("Predicted Values ")
+plt.ylabel("Actual Values ")
+plt.title("Titanic - Confusion Matrix")
+plt.show()
+
+
+#Use the Naive Bayes classifier to perform sentiment analysis on a dataset of movie
+#reviews, classifying them as either positive or negative based on the review text.
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.feature_extraction.text import TfidfVectorizer
+import pandas as pd
+from sklearn.metrics import accuracy_score,precision_score,recall_score,f1_score,confusion_matrix,classification_report
+from sklearn.model_selection import train_test_split
+df=pd.read_csv("https://raw.githubusercontent.com/aashii2004/Titanic-Dataset/refs/heads/main/movie_reviews.csv")
+X=df["review"]
+y=df["sentiment"]
+vectorizer=TfidfVectorizer(stop_words="english")
+X=vectorizer.fit_transform(X)
+model=MultinomialNB()
+X_train,X_test,y_train,y_test=train_test_split(X,y,random_state=42,test_size=0.2)
+model.fit(X_train,y_train)
+y_pred=model.predict(X_test)
+print("Acccuracy Score : ",accuracy_score(y_test,y_pred))
+print("Precision Score : ",precision_score(y_test,y_pred))
+print("Recall Score : ",recall_score(y_test,y_pred))
+print("F1 score : ",f1_score(y_test,y_pred))
+print("\nClassification Report : ")
+print(classification_report(y_test,y_pred))
+print("\nConfusion Matrix : ")
+print(confusion_matrix(y_test,y_pred))
+while True:
+    review=input("Enter movie review : ")
+    if review.lower()=="exit":
+        break
+    review_vector=vectorizer.transform([review])
+    predictions=model.predict(review_vector)
+    if predictions[0]==1:
+        print("Positive")
+    else:
+        print("Negative")
+
+
+#A company wants to predict the salary of employees based on their years of experience.
+#The company has collected data on the salaries and experience of 100 employees. Use
+#simple linear regression to model the relationship between salary and experience.
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error,r2_score
+df=pd.read_csv("https://raw.githubusercontent.com/aashii2004/Titanic-Dataset/refs/heads/main/Salary_Data.csv")
+df["Years of Experience"]=df["Years of Experience"].fillna(df["Years of Experience"].median())
+df["Salary"]=df["Salary"].fillna(df["Salary"].median())
+X=df[["Years of Experience"]]
+y=df["Salary"]
+X_train,X_test,y_train,y_test=train_test_split(X,y,random_state=42,test_size=0.2)
+model=LinearRegression()
+model.fit(X_train,y_train)
+y_pred=model.predict(X_test)
+print("Slope : ",model.coef_[0])
+print("Intercept : ",model.intercept_)
+print("Mean Squared Error : ",mean_squared_error(y_pred,y_test))
+print("R2_score : ",r2_score(y_pred,y_test))
+experience=float(input("Enter years of experience : "))
+salary=model.predict(pd.DataFrame({"Years of Experience":[experience]}))
+print("Predicted Salary : ",salary[0])
+plt.scatter(X,y)
+plt.plot(X,model.predict(X),color="red")
+plt.xlabel("Years of Experience")
+plt.ylabel("Salary")
+plt.show()
+
+
+#Use a dataset with features like square footage vs. house price. Implement a simple linear
+#regression model to predict house prices. Plot the regression line and calculate MSE and
+#R2 score.
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error,r2_score
+import matplotlib.pyplot as plt
+import pandas as pd
+df=pd.read_csv("https://raw.githubusercontent.com/aashii2004/Titanic-Dataset/refs/heads/main/Housing.csv")
+df["price"]=df["price"].fillna(df["price"].median())
+df["area"]=df["area"].fillna(df["area"].median())
+X=df[["area"]]
+y=df["price"]
+X_train,X_test,y_train,y_test=train_test_split(X,y,random_state=42,test_size=0.2)
+model=LinearRegression()
+model.fit(X_train,y_train)
+y_pred=model.predict(X_test)
+print("Slope : ",model.coef_[0])
+print("Intercept : ",model.intercept_)
+print("Mean Squared Error : ",mean_squared_error(y_test,y_pred))
+print("R2 Score : ",r2_score(y_test,y_pred))
+area=float(input("Enter House Area : "))
+predicted_price=model.predict(pd.DataFrame({"area":[area]}))
+print(predicted_price[0])
+plt.scatter(X,y)
+plt.plot(X,model.predict(X),color="red")
+plt.xlabel("Area (Square in feet)")
+plt.ylabel("Price")
+plt.show()
+
+
+
+#Load the tissue_gene_expression dataset. Run a k-means clustering on the data with K=7.
+#Make a table comparing the identified clusters to the actual tissue types. Run the algorithm
+#several times to see how the answer changes.
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import adjusted_rand_score
+import pandas as pd
+df=pd.read_csv("https://raw.githubusercontent.com/aashii2004/Titanic-Dataset/refs/heads/main/tissue_gene_expression.csv")
+X=df.drop(["rownames","y"],axis=1)
+X=StandardScaler().fit_transform(X)
+model=KMeans(n_clusters=7,random_state=0,n_init=10)
+clusters=model.fit_predict(X)
+print("Clusters Vs Actual Tissue Type : ")
+table=pd.crosstab(pd.Series(clusters,name="Cluster"),df["y"])
+print(table)
+for seed in range(5):
+    model=KMeans(n_clusters=7,random_state=seed,n_init=10)
+    clusters=model.fit_predict(X)
+    score=adjusted_rand_score(df["y"],clusters)
+    print("\n Run ",seed+1)
+    print("Adjusted Rand Score : ",round(score,1))
+    print(pd.crosstab(clusters,df["y"]))
+
+
+#create Bar Chart-Stacked taking x axis as Month and Y axis as Revenue and add Legend
+#colors <- , "orange" , "brown")
+#months , "Apr" , "May" , "Jun" , "Jul")
+#regions "West" , "North")
+import matplotlib.pyplot as plt
+months=["Mar","Apr","May","Jun","Jul"]
+east=[110,220,100,80,190]
+west=[200,50,110,30,100]
+north=[110,120,40,130,90]
+plt.bar(months,east,color="green",label="East")
+plt.bar(months,west,bottom=east,color="orange",label="West")
+bottom_north=[east[i]+west[i] for i in range(len(months))]
+plt.bar(months,north,bottom=bottom_north,color="brown",label="North")
+plt.title("Monthly Revenue by Region ")
+plt.xlabel("Months")
+plt.ylabel("Revenue")
+plt.legend()
+plt.show()
+
+
+
+#Use the data set "mtcars"and create boxplot for "mpg" and "cyl" columns
+import matplotlib.pyplot as plt
+import pandas as pd
+df=pd.read_csv("https://raw.githubusercontent.com/aashii2004/Titanic-Dataset/refs/heads/main/mtcars.csv")
+plt.boxplot(df["mpg"])
+plt.title("Box Plot for MPG")
+plt.show()
+plt.boxplot(df["cyl"])
+plt.title("Box Plot for CYL")
+plt.show()
+
+
+
+
+#Read the file moviesData.csv to create a bar chart of critics_score for the first IO movies.
+#Save the plot.
+import matplotlib.pyplot as plt
+import pandas as pd
+df=pd.read_csv("https://raw.githubusercontent.com/aashii2004/Titanic-Dataset/refs/heads/main/moviesData.csv")
+movie=df.head(10)
+plt.bar(movie["title"],movie["critics_score"])
+plt.title("Critics Score of 10 Movies ")
+plt.xlabel("Movie Name ")
+plt.ylabel("Critics Score ")
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
+
+
+
+#Using grocery dataset with minimum support to 0.001 and minimum confidence
+#of 0.8 build a frequent pattern tree (FP-Tree). Show for each transaction how the tree
+#evolves
+from collections import Counter
+from itertools import combinations
+import pandas as pd
+import math
+df=pd.read_csv("https://raw.githubusercontent.com/aashii2004/Titanic-Dataset/refs/heads/main/grocery.csv")
+transactions=[row.dropna().astype(str).str.strip().tolist() for _,row in df.iterrows()]
+min_support=0.001
+min_confidence=0.8
+min_count=math.ceil(min_support*len(transactions))
+counts=Counter()
+for t in transactions:
+    counts.update(set(t))
+frequent={item : count for item,count in counts.items() if count >= min_count}
+order=sorted(frequent,key= lambda x : (-frequent[x],x))
+rank={item : i for i,item in enumerate(order)}
+ordered_transactions=[]
+for t in transactions:
+    t=[item for item in t if item in frequent]
+    t.sort(key=lambda x : rank[x])
+    ordered_transactions.append(t)
+class Node:
+    def __init__(self,item,count=0):
+        self.item=item
+        self.count=count
+        self.children={}
+root=Node("ROOT",0)
+def insert(transaction):
+    current=root
+    for item in transaction:
+        if item not in current.children:
+            current.children[item]=Node(item)
+        current.children[item].count+=1
+        current=current.children[item]
+def display(node,level=0):
+    print(" "*level,str(node.item)," : ",str(node.count))
+    for child in node.children.values():
+        display(child,level+1)
+print("Item Frequenices : ")
+for item in order:
+    print(item," : ",frequent[item])
+print("Global Order : ")
+print("=>".join(order))
+print("Fp-Tree Evolution : ")
+for i,transaction in enumerate(ordered_transactions,1):
+    insert(transaction)
+    print(f"\nAfter T{i} : {'->'.join(transaction)}")
+    display(root)
+def support_count(items):
+    return sum(set(items).issubset(set(t)) for t in transactions)
+print("\nAssociation Rules : ")
+for a,b in combinations(frequent.keys(),2):
+    ab=support_count([a,b])
+    if ab==0:
+        continue
+    count_a=support_count([a])
+    count_b=support_count([b])
+    if count_a and ab/count_a >= min_confidence:
+        print(f"{a}->{b} : Confidence : {ab/count_a : .2f}")
+    if count_b and ab/count_b >= min_confidence:
+        print(f"{b}->{a} : Confidence : {ab/count_b : .2f}")
+
+
+#or
+
+from collections import Counter
+from itertools import combinations
+import pandas as pd
+import math
+
+df = pd.read_csv("https://raw.githubusercontent.com/aashii2004/Titanic-Dataset/refs/heads/main/grocery.csv")
+
+transactions = [row.dropna().astype(str).str.strip().tolist() for _, row in df.iterrows()]
+
+min_support = 0.001
+min_confidence = 0.8
+min_count = math.ceil(min_support * len(transactions))
+
+counts = Counter()
+for t in transactions:
+    counts.update(set(t))
+
+frequent = {item: count for item, count in counts.items() if count >= min_count}
+
+order = sorted(frequent, key=lambda x: (-frequent[x], x))
+rank = {item: i for i, item in enumerate(order)}
+
+ordered_transactions = []
+for t in transactions:
+    t = [item for item in t if item in frequent]
+    t.sort(key=lambda x: rank[x])
+    ordered_transactions.append(t)
+
+class Node:
+    def __init__(self, item, count=0):
+        self.item = item
+        self.count = count
+        self.children = {}
+
+root = Node("ROOT", 0)
+
+def insert(transaction):
+    current = root
+    for item in transaction:
+        if item not in current.children:
+            current.children[item] = Node(item)
+        current.children[item].count += 1
+        current = current.children[item]
+
+def display(node, level=0):
+    print("  " * level + str(node.item) + ":" + str(node.count))
+    for child in node.children.values():
+        display(child, level + 1)
+
+print("Item Frequencies:")
+for item in order:
+    print(item, ":", frequent[item])
+
+print("\nGlobal Order:")
+print(" => ".join(order))
+
+print("\nFP-Tree Evolution:")
+for i, transaction in enumerate(ordered_transactions, 1):
+    insert(transaction)
+    print(f"\nAfter T{i}: {' -> '.join(transaction)}")
+    display(root)
+
+def support_count(items):
+    return sum(set(items).issubset(set(t)) for t in transactions)
+
+print("\nAll Association Rules:")
+rules_found = False
+items = list(frequent.keys())
+
+for size in range(2, len(items) + 1):
+    for itemset in combinations(items, size):
+        count_all = support_count(itemset)
+
+        if count_all < min_count:
+            continue
+
+        for r in range(1, size):
+            for antecedent in combinations(itemset, r):
+                consequent = tuple(
+                    item for item in itemset if item not in antecedent
+                )
+
+                count_a = support_count(antecedent)
+
+                if count_a == 0:
+                    continue
+
+                confidence = count_all / count_a
+
+                if confidence >= min_confidence:
+                    support = count_all / len(transactions)
+                    print(
+                        f"{set(antecedent)} -> {set(consequent)} "
+                        f"| Support: {support:.4f} "
+                        f"| Confidence: {confidence:.2f}"
+                    )
+                    rules_found = True
+
+if not rules_found:
+    print("No rules found with confidence >= 0.8")
+
+
+#Use the FP-Growth Algorithm to perform Market Basket Analysis on a retail dataset. You
+#will extract frequent item sets and generate association rules to discover purchasing
+#patterns and help improve sales strategies.
+import pandas as pd
+from mlxtend.preprocessing import TransactionEncoder
+from mlxtend.frequent_patterns import fpgrowth, association_rules
+df = pd.read_csv("https://raw.githubusercontent.com/aashii2004/Titanic-Dataset/refs/heads/main/retail.csv")
+transactions = df.groupby("InvoiceNo")["Description"].apply(lambda x: x.dropna().astype(str).str.strip().tolist()).tolist()
+te = TransactionEncoder()
+data = te.fit(transactions).transform(transactions)
+basket = pd.DataFrame(data, columns=te.columns_)
+frequent_itemsets = fpgrowth(  basket,min_support=0.2,use_colnames=True)
+print("FREQUENT ITEMSETS")
+print(frequent_itemsets)
+rules = association_rules(frequent_itemsets, metric="confidence",min_threshold=0.8)
+print("\nASSOCIATION RULES")
+if not rules.empty:
+    print(rules[["antecedents", "consequents", "support", "confidence", "lift"]])
+else:
+    print("No association rules found.")
+print("\nSALES STRATEGIES")
+for _, rule in rules.iterrows():
+    print( f"Customers buying {set(rule['antecedents'])} " f"may also buy {set(rule['consequents'])}. "  f"Confidence: {rule['confidence']:.2f}")
+
+
+
+
+
+#Use the Apriori algorithm on the grocery dataset with minimum support to 0.001 and minimum confidence of 0.8 #indicate the top 5 association rules that are generated and
+#highlight the strong ones, sort them by confidence.
+import pandas as pd
+from mlxtend.preprocessing import TransactionEncoder
+from mlxtend.frequent_patterns import apriori, association_rules
+
+df = pd.read_csv(
+    "https://raw.githubusercontent.com/aashii2004/Titanic-Dataset/refs/heads/main/grocery.csv"
+)
+
+transactions = [
+    row.dropna().astype(str).str.strip().tolist()
+    for _, row in df.iterrows()
+]
+
+te = TransactionEncoder()
+data = te.fit(transactions).transform(transactions)
+basket = pd.DataFrame(data, columns=te.columns_)
+
+frequent_itemsets = apriori(
+    basket, min_support=0.001, use_colnames=True
+)
+
+rules = association_rules(
+    frequent_itemsets,
+    metric="confidence",
+    min_threshold=0.8
+)
+
+rules = rules.sort_values(
+    by="confidence", ascending=False
+)
+
+rules["Strength"] = rules["confidence"].apply(
+    lambda x: "STRONG" if x >= 0.8 else "Not Strong"
+)
+
+rules["antecedents"] = rules["antecedents"].apply(
+    lambda x: ", ".join(sorted(x))
+)
+rules["consequents"] = rules["consequents"].apply(
+    lambda x: ", ".join(sorted(x))
+)
+
+print("TOP 5 ASSOCIATION RULES")
+print(
+    rules[
+        ["antecedents", "consequents", "support",
+         "confidence", "lift", "Strength"]
+    ].head(5).to_string(index=False)
+)
+
+print("\nSTRONG RULES")
+strong_rules = rules[rules["confidence"] >= 0.8]
+
+if not strong_rules.empty:
+    print(
+        strong_rules[
+            ["antecedents", "consequents", "support",
+             "confidence", "lift", "Strength"]
+        ].head(5).to_string(index=False)
+    )
+else:
+    print("No strong rules found.")
+
